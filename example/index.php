@@ -1,6 +1,6 @@
 <?php
 
-include_once('UrlClean.php');
+include_once('../UrlClean.php');
 
 define('BASE_URL' , '/example/');
 /** Here we will be providing the directory location where our index.php file is stored and make sure to add slash ( / ) on both ends  **/ 
