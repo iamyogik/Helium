@@ -1,54 +1,129 @@
-<?php
+<?php 
 
 
-class UrlClean{
 
-	public $URL_array;
-	public $URL;
-	public $URL_Initial;
+class Helium{
+	
+	public $url;
+	public $goToDefault;
+	public $defaultFunction;
+	public $triggerDefault;
+
 
 	function __construct(){
-		$this->URL = $this->RemoveSlash(BASE_URL);
-		$this->URL_array = $this->ConvertIntoArray($this->URL);
-	}
-
-	
-	function RemoveSlash($BaseUrl){
-		$url_parts = explode('?', $_SERVER['REQUEST_URI']);
-		$url=str_replace($BaseUrl,"",$url_parts[0]);
-		if(substr($url,-1)=="/"){
-			$url=substr($url, 0,-1);
+		ob_start();
+		if (isset($_GET['url'])) {
+			$this->goToDefault = true;
+			$this->defaultFunction = false;
+			$this->triggerDefault = false;
+			$this->url = $_GET['url'];
+			$this->url = $this->removeLastSlash($this->url);
+		}else{
+			$this->goToDefault = true;
 		}
-		return $url;
 	}
 
 
-
-	function ConvertIntoArray($url){
-		$url = explode("/", $url);
-		return $url;
+	function removeLastSlash($url){
+		if (substr($url, -1)=="/") {
+			return substr($url, 0,-1);
+		}else{
+			return $url;
+		}
 	}
 
-	function array_combine_custom($arr1, $arr2) {
-	    $count = min(count($arr1), count($arr2));
-	    return array_combine(array_slice($arr1, 0, $count), array_slice($arr2, 0, $count));
+	function explodeUrl($url){
+		$expUrl = explode("/",$url);
+		return $expUrl;
 	}
 
 
-	function RunFun($ModelUrl,$Fun){
-		$ModelUrl=$this->ConvertIntoArray($ModelUrl);
-		$varArray=$this->array_combine_custom($ModelUrl,$this->URL_array);
+	function Run($ModelUrl, $Function){
+
+		if ($this->triggerDefault == false) {		
+
+		$expModelUrl =explode("/", $ModelUrl);
+		$expUrl =explode("/", $this->url);
+		if (count($expModelUrl) == count($expUrl)) {
+
+			$offset = 0;
+			$varArray = [];
+			$keyArray = [];
+
+			foreach ($expModelUrl as $key => $value) {
+				if (substr($value, 0, 1)=="{" && substr($value,-1)=="}") {
+					$expModelUrl = array_diff($expModelUrl, array($value));
+					$value=substr($value, 1);
+					$value=substr($value, 0,-1);
+					$nkey = $key - $offset;
+					$varArray[$key]=$value;
+					$offset++;
+				}else{
+					array_push($keyArray, $key);
+				}
+			}
+
+			$urlIsSame = true;
+			foreach ($keyArray as $key => $value) {
+				if ($expUrl[$value]==$expModelUrl[$value]) {
+				}else{
+					$urlIsSame = false;
+				}
+
+			}
+
+			if ($urlIsSame) {
+				$data =[];
+				foreach ($varArray as $key => $value) {
+					$data[$value] = $expUrl[$key];
+				}
+
+				$this->goToDefault = false;
+				$Function($data);
+			}
+		}else{
+
+		}
+
+		}
+	}
+
+	function triggerDefault(){
+		ob_end_clean();
+		$this->goToDefault = true;
+		$this->triggerDefault = true;
+		if ($this->defaultFunction == false) {
+			$this->defaultFunction = function(){
+				echo "";
+			};
+		}
 		
-		if(count($this->URL_array)==count($ModelUrl)){
-
-			//extract($varArray);
-			$Fun($varArray);
-		}
-
+		
 	}
+
+
+	function setDefault($Function){
+		$this->defaultFunction = $Function;
+	}
+
+	 public function __destruct(){
+	 	$DefaultFunction = $this->defaultFunction;
+	 	if ($this->goToDefault && $this->defaultFunction != false) {
+	 		$DefaultFunction();
+	 	}
+        
+    }
+
+
+
 
 
 }
 
 
 ?>
+
+
+
+
+
