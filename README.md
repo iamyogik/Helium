@@ -26,6 +26,14 @@ Clone or download the repository to your local machine.The downloaded  folder wi
 ## Installing
 
 The installation is pretty simple. Just copy the .htaccess file to the root of your home directory. Move the file named __*Helium.php*__ from the __*src*__ to __*/Helium*__ in your root directory. Now you can either create a new index.php file in the root directory or copy the one from __*/example*__ folder. If you use the example file then you don't need to do the rest of the installation as most of the code if pre-written.
+```
+├── home
+    ├── Helium
+    |   └──Helium.php
+    |──.htaccess
+    └──index.php
+        
+```
 
    #### If creating a new index.php
    
